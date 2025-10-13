@@ -1,0 +1,71 @@
+app:
+  title: Backstage Developer Portal
+  baseUrl: http://localhost:3000
+
+organization:
+  name: Backstage Solutions
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+  cors:
+    origin: http://localhost:3000
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  database:
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST:-localhost}
+      port: ${POSTGRES_PORT:-5432}
+      user: ${POSTGRES_USER:-backstage}
+      password: ${POSTGRES_PASSWORD:-backstage}
+      database: ${POSTGRES_DB:-backstage_catalog}
+
+integrations:
+  github:
+    - host: github.com
+      token: ${GITHUB_TOKEN}
+
+proxy:
+  endpoints:
+    '/test':
+      target: 'https://httpbin.org'
+      changeOrigin: true
+
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'docker'
+  publisher:
+    type: 'local'
+
+auth:
+  environment: development
+  providers:
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+
+scaffolder:
+  github:
+    token: ${GITHUB_TOKEN}
+    visibility: public
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location]
+  locations:
+    - type: url
+      target: https://github.com/Portfolio-jaime/BACKSTAGE-KIND-MIGRATION/blob/main/backstage-catalog/platform-services.yaml
+
+logging:
+  level: info
+  format:
+    type: json

@@ -1,0 +1,78 @@
+{
+  "name": "backstage",
+  "version": "1.0.0",
+  "main": "packages/backend",
+  "repository": "https://github.com/Portfolio-jaime/BACKSTAGE-KIND-MIGRATION",
+  "author": "Jaime Henao <jaime.andres.henao.arbelaez@ba.com>",
+  "license": "Apache-2.0",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "dev": "concurrently \"yarn start\" \"yarn start-backend\"",
+    "start": "yarn workspace app start",
+    "start-backend": "yarn workspace backend start",
+    "build": "yarn build:backend && yarn build:frontend",
+    "build:backend": "yarn workspace backend build",
+    "build:frontend": "yarn workspace app build",
+    "test": "yarn test:backend && yarn test:frontend",
+    "test:backend": "yarn workspace backend test",
+    "test:frontend": "yarn workspace app test",
+    "lint": "yarn lint:backend && yarn lint:frontend",
+    "lint:backend": "yarn workspace backend lint",
+    "lint:frontend": "yarn workspace app lint",
+    "clean": "backstage-cli clean && yarn clean:dist",
+    "clean:dist": "rimraf packages/*/dist",
+    "docker:build": "docker build -t backstage-app .",
+    "docker:run": "docker run -p 7007:7007 backstage-app",
+    "k8s:deploy": "kubectl apply -f kubernetes/",
+    "k8s:undeploy": "kubectl delete -f kubernetes/",
+    "helm:install": "helm install backstage ./helm/backstage",
+    "helm:upgrade": "helm upgrade backstage ./helm/backstage",
+    "helm:uninstall": "helm uninstall backstage"
+  },
+  "dependencies": {
+    "@backstage/core-app-api": "^1.12.4",
+    "@backstage/core-components": "^0.14.4",
+    "@backstage/core-plugin-api": "^1.9.2",
+    "@backstage/integration-react": "^1.1.25",
+    "@backstage/plugin-api-docs": "^0.11.4",
+    "@backstage/plugin-catalog": "^1.19.0",
+    "@backstage/plugin-catalog-react": "^1.11.2",
+    "@backstage/plugin-github-actions": "^0.6.12",
+    "@backstage/plugin-org": "^0.6.23",
+    "@backstage/plugin-scaffolder": "^1.19.0",
+    "@backstage/plugin-scaffolder-react": "^1.8.0",
+    "@backstage/plugin-search": "^1.4.9",
+    "@backstage/plugin-search-react": "^1.7.8",
+    "@backstage/plugin-techdocs": "^1.10.4",
+    "@backstage/plugin-techdocs-react": "^1.2.3",
+    "@backstage/plugin-user-settings": "^0.8.4",
+    "@backstage/theme": "^0.5.2"
+  },
+  "devDependencies": {
+    "@backstage/cli": "^0.26.4",
+    "@spotify/prettier-config": "^14.0.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.3"
+  },
+  "resolutions": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  },
+  "prettier": "@spotify/prettier-config",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  backstage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7007:7007"
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=backstage
+      - POSTGRES_PASSWORD=backstage
+      - POSTGRES_DB=backstage_catalog
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - backstage
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=backstage_catalog
+      - POSTGRES_USER=backstage
+      - POSTGRES_PASSWORD=backstage
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backstage -d backstage_catalog"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backstage
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - backstage
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  backstage:
+    driver: bridge

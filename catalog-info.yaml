@@ -1,0 +1,77 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-developer-portal
+  description: Backstage Developer Portal for the organization
+  annotations:
+    github.com/project-slug: Portfolio-jaime/BACKSTAGE-KIND-MIGRATION
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: website
+  lifecycle: production
+  owner: platform-team
+  system: developer-portal
+  providesApis:
+    - backstage-api
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: backstage-api
+  description: Backstage backend API
+spec:
+  type: openapi
+  lifecycle: production
+  owner: platform-team
+  system: developer-portal
+  definition:
+    $text: ./packages/backend/src/schema/openapi.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: developer-portal
+  description: Developer Portal System
+spec:
+  owner: platform-team
+  domain: platform
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: platform
+  description: Platform Engineering Domain
+spec:
+  owner: platform-team
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-team
+  description: Platform Engineering Team
+spec:
+  type: team
+  profile:
+    displayName: Platform Team
+    email: platform@company.com
+    picture: https://avatars.githubusercontent.com/u/51085021?s=200&v=4
+  parent: engineering
+  children: []
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: jaime.henao
+  annotations:
+    github.com/user-login: Portfolio-jaime
+spec:
+  profile:
+    displayName: Jaime Henao
+    email: jaime.andres.henao.arbelaez@ba.com
+    picture: https://avatars.githubusercontent.com/u/51085021?s=200&v=4
+  memberOf: [platform-team]
