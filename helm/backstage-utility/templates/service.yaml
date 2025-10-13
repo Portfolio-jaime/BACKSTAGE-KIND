@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "backstage-utility.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "backstage-utility.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ (include "backstage-utility.env" . | fromYaml).service.port }}
+      targetPort: 7007
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "backstage-utility.selectorLabels" . | nindent 4 }}

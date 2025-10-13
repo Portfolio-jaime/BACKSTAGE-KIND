@@ -1,0 +1,177 @@
+# Backstage Utility Chart Values
+# Supports both development and production environments
+
+# Global configuration
+global:
+  namespace: backstage-utility
+  environment: dev  # dev or prod
+
+# Environment-specific configurations
+environments:
+  dev:
+    replicaCount: 1
+    image:
+      tag: "latest"
+    service:
+      port: 3008
+    postgresql:
+      port: 5434
+    ingress:
+      host: backstage-dev.utility.local
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+
+  prod:
+    replicaCount: 2
+    image:
+      tag: "stable"
+    service:
+      port: 7009
+    postgresql:
+      port: 5435
+    ingress:
+      host: backstage-prod.utility.local
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+# Backstage application configuration
+backstage:
+  enabled: true
+  image:
+    repository: jaimehenao8126/backstage-production
+    pullPolicy: Always
+
+  # Environment variables
+  env:
+    NODE_ENV: production
+    NODE_OPTIONS: "--max-old-space-size=512"
+    # PostgreSQL connection will be set via secret
+
+  # Health checks
+  probes:
+    liveness:
+      path: /healthcheck
+      port: 7007
+      initialDelaySeconds: 60
+    readiness:
+      path: /healthcheck
+      port: 7007
+      initialDelaySeconds: 30
+
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  architecture: standalone
+  auth:
+    postgresPassword: "changeme123"
+    username: "backstage"
+    password: "backstage123"
+    database: "backstage_catalog"
+
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+# Service configuration
+service:
+  type: ClusterIP
+  annotations: {}
+
+# ConfigMap for environment variables
+configMap:
+  data:
+    BACKSTAGE_BASE_URL: "http://backstage-{{ .Values.global.environment }}.utility.local"
+    BACKSTAGE_LISTEN_HOST: "0.0.0.0"
+    BACKSTAGE_LISTEN_PORT: "7007"
+
+# Secrets for sensitive data
+secrets:
+  data:
+    POSTGRES_HOST: "backstage-utility-postgresql"
+    POSTGRES_PORT: "{{ .Values.environments[ .Values.global.environment ].postgresql.port }}"
+    POSTGRES_DB: "backstage_catalog"
+    POSTGRES_USER: "backstage"
+    POSTGRES_PASSWORD: "backstage123"
+    # Add other secrets as needed
+
+# Autoscaling (only for production)
+autoscaling:
+  enabled: false  # Enable only for prod via override
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - port: 7007
+          protocol: TCP
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: backstage-utility
+      ports:
+        - port: "{{ .Values.environments[ .Values.global.environment ].postgresql.port }}"
+          protocol: TCP
+    - to: []
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+# Resource quotas
+resourceQuota:
+  enabled: true
+  hard:
+    requests.cpu: "1"
+    requests.memory: 2Gi
+    limits.cpu: "2"
+    limits.memory: 4Gi
+    persistentvolumeclaims: "2"
+    pods: "10"
+    services: "5"
+    secrets: "10"
+    configmaps: "10"

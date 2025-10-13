@@ -1,0 +1,12 @@
+apiVersion: v2
+name: backstage-utility
+description: Backstage deployment with dev/prod environments in utility namespace
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: postgresql
+    version: "15.2.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled

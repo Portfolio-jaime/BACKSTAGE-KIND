@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backstage-utility.fullname" . }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "backstage-utility.labels" . | nindent 4 }}
+spec:
+  replicas: {{ (include "backstage-utility.env" . | fromYaml).replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "backstage-utility.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "backstage-utility.selectorLabels" . | nindent 8 }}
+        component: backend
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "backstage-utility.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.backstage.securityContext | nindent 8 }}
+      containers:
+        - name: backstage
+          image: "{{ .Values.backstage.image.repository }}:{{ (include "backstage-utility.env" . | fromYaml).image.tag }}"
+          imagePullPolicy: {{ .Values.backstage.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 7007
+              protocol: TCP
+          env:
+            {{- range $key, $value := .Values.backstage.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "backstage-utility.fullname" . }}-config
+            - secretRef:
+                name: {{ include "backstage-utility.fullname" . }}-secret
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backstage.probes.liveness.path }}
+              port: {{ .Values.backstage.probes.liveness.port }}
+            initialDelaySeconds: {{ .Values.backstage.probes.liveness.initialDelaySeconds }}
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backstage.probes.readiness.path }}
+              port: {{ .Values.backstage.probes.readiness.port }}
+            initialDelaySeconds: {{ .Values.backstage.probes.readiness.initialDelaySeconds }}
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml (include "backstage-utility.env" . | fromYaml).resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: app-tmp
+              mountPath: /app/tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 500Mi
+        - name: app-tmp
+          emptyDir:
+            sizeLimit: 500Mi
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
