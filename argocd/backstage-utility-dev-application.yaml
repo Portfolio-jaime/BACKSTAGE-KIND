@@ -15,7 +15,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Portfolio-jaime/BACKSTAGE-KIND-MIGRATION.git
+    repoURL: https://github.com/Portfolio-jaime/BACKSTAGE-KIND.git
     targetRevision: main
     path: helm/backstage-utility
     helm:

@@ -1,18 +1,18 @@
 app:
   title: Backstage Developer Portal
-  baseUrl: https://backstage.utility.local
+  baseUrl: ${APP_BASE_URL}
 
 organization:
   name: Backstage Solutions
 
 backend:
-  baseUrl: https://backstage.utility.local
+  baseUrl: ${APP_BASE_URL}
   listen:
     port: 7007
   csp:
     connect-src: ["'self'", 'http:', 'https:']
   cors:
-    origin: https://backstage.utility.local
+    origin: ${APP_BASE_URL}
     methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
     credentials: true
   database:
@@ -72,7 +72,7 @@ catalog:
     - allow: [Component, System, API, Resource, Location]
   locations:
     - type: url
-      target: https://github.com/Portfolio-jaime/BACKSTAGE-KIND-MIGRATION/blob/main/backstage-catalog/platform-services.yaml
+      target: https://github.com/Portfolio-jaime/BACKSTAGE-KIND/blob/main/backstage-catalog/platform-services.yaml
 
 logging:
   level: info

@@ -112,7 +112,7 @@ service:
 # ConfigMap for environment variables
 configMap:
   data:
-    BACKSTAGE_BASE_URL: "http://backstage-{{ .Values.global.environment }}.utility.local"
+    APP_BASE_URL: "http://backstage-{{ .Values.global.environment }}.utility.local"
     BACKSTAGE_LISTEN_HOST: "0.0.0.0"
     BACKSTAGE_LISTEN_PORT: "7007"
 
