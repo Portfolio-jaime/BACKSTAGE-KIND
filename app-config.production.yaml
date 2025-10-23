@@ -72,7 +72,7 @@ catalog:
     - allow: [Component, System, API, Resource, Location]
   locations:
     - type: url
-      target: https://github.com/Portfolio-jaime/BACKSTAGE-KIND/blob/main/backstage-catalog/platform-services.yaml
+      target: https://github.com/Portfolio-jaime/BACKSTAGE-KIND-MIGRATION/blob/main/backstage-catalog/platform-services.yaml
 
 logging:
   level: info
